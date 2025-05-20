@@ -1,0 +1,29 @@
+stages:
+  - build
+
+variables:
+  REGISTRY: registry.gitlab.com
+  PROJECT_PATH: $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+
+build_php:
+  stage: build
+  script:
+    - docker build -t $REGISTRY/$PROJECT_PATH/php:latest ./php
+    - docker push $REGISTRY/$PROJECT_PATH/php:latest
+  only:
+    changes:
+      - php/**/*
+      - .gitlab-ci.yml
+
+build_wordpress:
+  stage: build
+  needs:
+    - job: build_php
+      artifacts: false
+  script:
+    - docker build -t $REGISTRY/$PROJECT_PATH/wordpress:latest ./wordpress
+    - docker push $REGISTRY/$PROJECT_PATH/wordpress:latest
+  only:
+    changes:
+      - wordpress/**/*
+      - .gitlab-ci.yml
